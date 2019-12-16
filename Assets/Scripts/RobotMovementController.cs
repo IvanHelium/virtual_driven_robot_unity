@@ -15,7 +15,7 @@ public class RobotMovementController : MonoBehaviour
 
     private bool isMovingStarted = false;
     private float remain_movement_distance = 0.0f;
-    private float movement_distance = 4.0f;
+    private float movement_distance = 2.5f;
 
     private Vector2 getVector; //vector between our movement direction (_vector2_curr_dir) and vector of robot rigidbody (it is not same)
 
@@ -46,6 +46,20 @@ public class RobotMovementController : MonoBehaviour
 
 
     }
+
+
+    //----------------------------------------------------------------------
+    //
+    // utilities functions
+    //
+    //----------------------------------------------------------------------
+
+    public Vector2 getCurrentRobotDirection()
+    {
+        return _vector2_curr_dir;
+    }
+
+
 
     //----------------------------------------------------------------------
     //----------------------------------------------------------------------
@@ -149,8 +163,9 @@ public class RobotMovementController : MonoBehaviour
         float module_b = 0.0f;
         float cos_angle = 0.0f;
 
-        getVector = _rigidbody2D.GetVector(_vector2_curr_dir); 
-        
+        getVector = _rigidbody2D.GetVector(_vector2_curr_dir);
+
+        //dont handmade function as i do it is my mistake
         scalar_product = getVector.x * _vector2_dir_north.x + getVector.y * _vector2_dir_north.y;
         module_a = Mathf.Sqrt(Mathf.Pow(getVector.x, 2.0f) + Mathf.Pow(getVector.y, 2.0f));
         module_b = Mathf.Sqrt(Mathf.Pow(_vector2_dir_north.x, 2.0f) + Mathf.Pow(_vector2_dir_north.y, 2.0f));

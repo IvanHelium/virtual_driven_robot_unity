@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\GameController.cs" />
     <Compile Include="Assets\Scripts\RobotMovementController.cs" />
     <Compile Include="Assets\Scripts\SceneSwitcher.cs" />
+    <Compile Include="Assets\Scripts\SensorHandler.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>D:/ImportantData/Projects/unityProjects/virtual_driven_robot/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
