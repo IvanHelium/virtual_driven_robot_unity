@@ -8,13 +8,18 @@ public class SensorHandler : MonoBehaviour
     public GameObject searchingTarget;
 
     private byte _sensor_state;
-    public byte _direction_sensor_state;
+    private byte _direction_sensor_state;
+    public byte _distance_sensor_state;
 
     private List<Collider2D> childrenColliders;
     private List<SpriteRenderer> childrenSpriteRenderer;
 
-    public float directionToTargetDegree;
-    private Vector2 directionToTargetVec = new Vector2(0.0f, 0.0f); 
+    private float directionToTargetDegree;
+    private Vector2 directionToTargetVec = new Vector2(0.0f, 0.0f);
+
+    private float maxDistance;
+    private float sectorDistance;
+    private const int NUMBERS_OF_SECTORS = 16;
 
     private RobotMovementController robotMovementController;
 
@@ -52,7 +57,7 @@ public class SensorHandler : MonoBehaviour
         robotMovementController = gameObject.GetComponent<RobotMovementController>();
         AddChildrenSpriteRenderer(transform);
         AddChildrenColliders(transform);
-        
+        initializeDistanceSensor();
     }
 
     // Update is called once per frame
@@ -63,9 +68,111 @@ public class SensorHandler : MonoBehaviour
 
     private void FixedUpdate()
     {
-        calculateDirection();
+        calculateDirectionTick();
+        calculateDistanceTick();
     }
 
+    //-----------------------------------------------------------------------------------------
+    //work with distances
+    //-----------------------------------------------------------------------------------------
+    void calculateDistanceTick()
+    {
+        float currentDistance;
+        currentDistance = calculateDistance();
+        if (currentDistance > sectorDistance * 15)
+        {
+            _distance_sensor_state = 15;
+        }
+        else if(currentDistance > sectorDistance * 14)
+        {
+            _distance_sensor_state = 14;
+        }
+        else if (currentDistance > sectorDistance * 13)
+        {
+            _distance_sensor_state = 13;
+        }
+        else if (currentDistance > sectorDistance * 12)
+        {
+            _distance_sensor_state = 12;
+        }
+        else if (currentDistance > sectorDistance * 11)
+        {
+            _distance_sensor_state = 11;
+        }
+        else if (currentDistance > sectorDistance * 10)
+        {
+            _distance_sensor_state = 10;
+        }
+        else if (currentDistance > sectorDistance * 9)
+        {
+            _distance_sensor_state = 9;
+        }
+        else if (currentDistance > sectorDistance * 8)
+        {
+            _distance_sensor_state = 8;
+        }
+        else if (currentDistance > sectorDistance * 7)
+        {
+            _distance_sensor_state = 7;
+        }
+        else if (currentDistance > sectorDistance * 6)
+        {
+            _distance_sensor_state = 6;
+        }
+        else if (currentDistance > sectorDistance * 5)
+        {
+            _distance_sensor_state = 5;
+        }
+        else if (currentDistance > sectorDistance * 4)
+        {
+            _distance_sensor_state = 4;
+        }
+        else if (currentDistance > sectorDistance * 3)
+        {
+            _distance_sensor_state = 3;
+        }
+        else if (currentDistance > sectorDistance * 2)
+        {
+            _distance_sensor_state = 2;
+        }
+        else if (currentDistance > sectorDistance * 1)
+        {
+            _distance_sensor_state = 1;
+        }
+        else if (currentDistance > sectorDistance * 0)
+        {
+            _distance_sensor_state = 0;
+        }
+    }
+
+    void initializeDistanceSensor() 
+    {
+        _distance_sensor_state = 255;
+        initializeMaxDistance(calculateDistance());
+    }
+    void initializeMaxDistance(float maxDistanceValue)
+    {   //whole distance devides into 16 sectors to make distance discrete
+        maxDistance = maxDistanceValue;
+        sectorDistance = maxDistance / NUMBERS_OF_SECTORS;
+    }
+
+    float calculateDistance()
+    {
+        Transform robotTransform;
+        Transform targetTransform;
+        robotTransform = transform;
+        targetTransform = searchingTarget.transform;
+        if (searchingTarget == null)
+        {
+            return -1.0f;
+        }
+        return Vector2.Distance(targetTransform.position, robotTransform.position);
+    }
+
+
+    //-----------------------------------------------------------------------------------------
+    //work with directions
+    //-----------------------------------------------------------------------------------------
     byte changeDirectionSensorState(float directionToTargetDegree)
     {
         byte directionSensorState = 12;
@@ -140,7 +247,9 @@ public class SensorHandler : MonoBehaviour
         }
         return false;
     }
-    void calculateDirection()
+
+
+    void calculateDirectionTick()
     {
         Vector2 currentRobotDirection = robotMovementController.getCurrentRobotDirection();
         Transform robotTransform = transform;
@@ -155,6 +264,11 @@ public class SensorHandler : MonoBehaviour
 
         _direction_sensor_state = changeDirectionSensorState(directionToTargetDegree);
     }
+
+
+    //-----------------------------------------------------------------------------------------
+    //work with colliders and collisions
+    //-----------------------------------------------------------------------------------------
 
 
     private void AddChildrenColliders(Transform t)
