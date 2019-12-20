@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class SensorHandler : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class SensorHandler : MonoBehaviour
 
     private byte _sensor_state;
     private byte _direction_sensor_state;
-    public byte _distance_sensor_state;
+    private byte _distance_sensor_state;
 
     private List<Collider2D> childrenColliders;
     private List<SpriteRenderer> childrenSpriteRenderer;
@@ -63,14 +64,16 @@ public class SensorHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        drawDistanceSectorLine();
     }
 
     private void FixedUpdate()
     {
         calculateDirectionTick();
         calculateDistanceTick();
+
     }
+
 
     //-----------------------------------------------------------------------------------------
     //work with distances
@@ -169,7 +172,40 @@ public class SensorHandler : MonoBehaviour
         return Vector2.Distance(targetTransform.position, robotTransform.position);
     }
 
+    //-----------------------------------------------------------------------------------------
+    //draw line for distance sensor (with sectors)
 
+    
+    void drawDistanceSectorLine()
+    {
+        int numbersOfSectors;
+        Transform robotTransform;
+        Transform targetTransform;
+        robotTransform = transform;
+        targetTransform = searchingTarget.transform;
+        numbersOfSectors = 0;
+        Vector2 fromTargetToRobotVector = robotTransform.position - targetTransform.position;
+        Vector2 fromTargetToRobotVectorNormilized = (fromTargetToRobotVector / fromTargetToRobotVector.magnitude) * sectorDistance; //calculate vector of one sector with magnitude equal to sectorDistance
+        Vector2 currentPositionAtLine = targetTransform.position;
+        Debug.DrawLine(robotTransform.position, targetTransform.position, Color.red, 0.0f);
+        if (calculateDistance() > maxDistance)
+        {
+            numbersOfSectors = NUMBERS_OF_SECTORS;
+        }
+        else
+        {
+            numbersOfSectors = (int)(calculateDistance() / sectorDistance);
+        }
+        for (int i = 0; i < numbersOfSectors; i++)
+        {
+            currentPositionAtLine = currentPositionAtLine + fromTargetToRobotVectorNormilized; //next sector point(sector) on distance line
+            Debug.DrawLine(currentPositionAtLine, currentPositionAtLine + Vector2.Perpendicular(fromTargetToRobotVectorNormilized), Color.red, 0.0f); //draw perpendicular line
+        }
+
+
+
+
+    }
     //-----------------------------------------------------------------------------------------
     //work with directions
     //-----------------------------------------------------------------------------------------
