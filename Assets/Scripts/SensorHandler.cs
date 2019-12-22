@@ -8,9 +8,11 @@ public class SensorHandler : MonoBehaviour
 
     public GameObject searchingTarget;
 
-    private byte _sensor_state;
-    private byte _direction_sensor_state;
-    private byte _distance_sensor_state;
+    private ushort _touching_sensor_state;
+    private ushort _direction_sensor_state;
+    private ushort _distance_sensor_state;
+
+    private ushort g_global_sensor_state; //sensor state which we will be using for data transfer to robot
 
     private List<Collider2D> childrenColliders;
     private List<SpriteRenderer> childrenSpriteRenderer;
@@ -71,9 +73,27 @@ public class SensorHandler : MonoBehaviour
     {
         calculateDirectionTick();
         calculateDistanceTick();
-
+        mergeSensorData();
     }
 
+
+    //-----------------------------------------------------------------------------------------
+    //
+    //-----------------------------------------------------------------------------------------
+    void mergeSensorData()
+    {
+    g_global_sensor_state &= 0xFFF8;
+    g_global_sensor_state |= (_touching_sensor_state); //update touching sensor state
+    g_global_sensor_state &= 0xFF87;
+    g_global_sensor_state |= (ushort)(((_direction_sensor_state )) << 3); //update direction sensor state
+    g_global_sensor_state &= 0xF87F;
+    g_global_sensor_state |= (ushort)(((uint)(_distance_sensor_state )) << 7); //update distance sensor state
+    }
+
+    public ushort getGlobalSensorState()
+    {
+        return g_global_sensor_state;
+    }
 
     //-----------------------------------------------------------------------------------------
     //work with distances
@@ -373,12 +393,12 @@ public class SensorHandler : MonoBehaviour
             //Whether this collider is touching any collider on the specified layerMask or not.
             if (childrenColliders[i].IsTouchingLayers()) 
             {
-                _sensor_state |= (byte)(1 << i);
+                _touching_sensor_state |= (ushort)(1 << i);
                 childrenSpriteRenderer[i].color = Color.red;
             }
             else
             {
-                _sensor_state &= ((byte)~(1 << i));
+                _touching_sensor_state &= ((ushort)~(1 << i));
                 childrenSpriteRenderer[i].color = Color.white;
             }
                 

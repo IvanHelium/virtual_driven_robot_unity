@@ -41,8 +41,8 @@ public class RobotMovementController : MonoBehaviour
     {
         rotate_and_move_tick();
 
-        action_move_forward();
-        //action_rotate_left_90_and_move_forward();
+        //action_move_forward();
+        action_rotate_left_90_and_move_forward();
 
 
     }
