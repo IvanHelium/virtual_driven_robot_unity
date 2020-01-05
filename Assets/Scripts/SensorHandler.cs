@@ -100,9 +100,9 @@ public class SensorHandler : MonoBehaviour
     g_global_sensor_state &= 0xFFF8;
     g_global_sensor_state |= (_touching_sensor_state); //update touching sensor state
     g_global_sensor_state &= 0xFF87;
-    g_global_sensor_state |= (ushort)(((_direction_sensor_state )) << 3); //update direction sensor state
+    g_global_sensor_state |= (ushort)(((_direction_sensor_state)) << 3); //update direction sensor state
     g_global_sensor_state &= 0xF87F;
-    g_global_sensor_state |= (ushort)(((uint)(_distance_sensor_state )) << 7); //update distance sensor state
+    g_global_sensor_state |= (ushort)(((uint)(_distance_sensor_state)) << 7); //update distance sensor state
     }
 
     public ushort getGlobalSensorState()

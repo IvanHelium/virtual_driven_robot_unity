@@ -36,6 +36,8 @@ public class SceneSwitcher : MonoBehaviour {
     {
         SceneManager.LoadScene(sceneToLoad);
         SceneManager.sceneLoaded += OnSceneLoaded;
+
+        
     }
 
     public void loadMenuScene()
@@ -60,7 +62,6 @@ public class SceneSwitcher : MonoBehaviour {
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-
         SceneManager.sceneLoaded -= OnSceneLoaded; //destroy connections
     }
 
