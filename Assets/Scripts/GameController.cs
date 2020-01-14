@@ -26,7 +26,8 @@ public class GameController : MonoBehaviour {
 
     private float timeToUpdateListOfComPorts = 2.0f;
 
-
+    
+    private RobotMovementController robotMovementController;
 
     void OnEnable()
     {
@@ -44,9 +45,15 @@ public class GameController : MonoBehaviour {
     {
         Debug.Log("Level Loaded");
         Debug.Log(scene.name);
-        findUIComponents();
-        if (isSettingMenuScene)
+        
+        if(scene.name == "GameScene")
         {
+            findRobotComponents();
+            addRobotActionEventListener();
+        }
+        if (scene.name == "Settings")
+        {
+            findUIComponentsOnSettingsScene();
             StartCoroutine(refillDropdownList());
         }
     }
@@ -66,11 +73,36 @@ public class GameController : MonoBehaviour {
         }
         comPort = gameController.GetComponent<ComPort>();
     }
+    //-----------------------------------------------------------------------------
 
-
-    private void findUIComponents()
+    private static void SendRespond(object sender, RobotEventArgs e) //this function send robot's state to control unit
     {
-        isSettingMenuScene = false;
+        Debug.Log("send respond : SensorsState = " + e.SensorState);
+        //send to serial port
+    }
+    //-----------------------------------------------------------------------------
+
+    void addRobotActionEventListener()
+    {
+        if(robotMovementController != null)
+        {
+            robotMovementController.NotifyActionDone += SendRespond;
+        }
+
+    }
+
+    //-----------------------------------------------------------------------------
+    private void findRobotComponents()
+    {
+        if (UnityEngine.Object.FindObjectOfType<RobotMovementController>() != null)
+        {
+            robotMovementController = UnityEngine.Object.FindObjectOfType<RobotMovementController>();
+            Debug.Log(robotMovementController);
+        }
+    }
+
+    private void findUIComponentsOnSettingsScene()
+    {
         if (GameObject.Find("Canvas") != null)
         {
             canvas = GameObject.Find("Canvas").GetComponentInChildren<Canvas>();
@@ -83,11 +115,10 @@ public class GameController : MonoBehaviour {
         {
             openComPortButton = GameObject.Find("ButtonOpenPort").GetComponentInChildren<Button>();
             openComPortButton.onClick.RemoveAllListeners();
-            openComPortButton.onClick.AddListener(onClickOpenPort);
-            isSettingMenuScene = true;
+            openComPortButton.onClick.AddListener(onClickOpenPort);  
         }
     }
-
+    //-----------------------------------------------------------------------------
     private IEnumerator refillDropdownList()
     {
         while(true)
@@ -114,8 +145,13 @@ public class GameController : MonoBehaviour {
     void OnApplicationQuit()
     {
         comPort.closeSerialPort();
+        //save someone
         Debug.Log("Application ending after " + Time.time + " seconds");
     }
+
+ 
+
+
 
     //----------------------------------------------------------------------
     // dont use for a while its just prototype
@@ -150,8 +186,8 @@ public class GameController : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		
-	}
+
+    }
 }
 
 [Serializable]

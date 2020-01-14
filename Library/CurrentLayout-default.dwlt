@@ -387,34 +387,34 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scenes
+    - Assets/Scripts
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Scenes
+  - Assets/Scripts
   m_LastFoldersGridSize: -1
   m_LastProjectPath: D:\ImportantData\Projects\unityProjects\virtual_driven_robot
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 55}
-    m_SelectedIDs: 66300000
-    m_LastClickedID: 12390
+    m_SelectedIDs: ea2e0000
+    m_LastClickedID: 12010
     m_ExpandedIDs: 00000000522d0000882f0000303000006031000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: robot_parts
-      m_OriginalName: robot_parts
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 11642
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 2}
     m_SearchString: 
@@ -551,23 +551,23 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 2e310000
+      m_SelectedIDs: d02a0000
       m_LastClickedID: 0
-      m_ExpandedIDs: 8cdaffff40dbffff7adbffff9eddffff9cdeffffe2ebffff2ceeffff62efffffeaf2ffff20f4ffff10f7ffff5af7ffff72fbfffff4ffffff7a40000034410000f0420000
+      m_ExpandedIDs: 72fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: g_GameController
-        m_OriginalName: g_GameController
+        m_Name: 
+        m_OriginalName: 
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: -5158
+        m_UserData: 0
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 0
+        m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_ClientGUIView: {fileID: 6}
       m_SearchString: 
@@ -613,9 +613,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 624.5265, y: 262.46585, z: -87.953094}
+    m_Target: {x: 529.815, y: 323.94156, z: -597.4023}
     speed: 2
-    m_Value: {x: 624.5265, y: 262.46585, z: -87.953094}
+    m_Value: {x: 529.815, y: 323.94156, z: -597.4023}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -648,9 +648,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 866.989
+    m_Target: 597.2339
     speed: 2
-    m_Value: 866.989
+    m_Value: 597.2339
   m_Ortho:
     m_Target: 1
     speed: 2

@@ -9,6 +9,8 @@ public class ComPort : MonoBehaviour
 
     private SerialPort _serial = new SerialPort();
 
+
+
     void Start()
     {
 

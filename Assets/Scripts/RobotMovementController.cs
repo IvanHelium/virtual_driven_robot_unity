@@ -2,6 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+public class RobotEventArgs
+{
+    public ushort SensorState { get; }
+    public RobotEventArgs(ushort sensorState)
+    {
+        SensorState = sensorState;
+    }
+}
+
 public class RobotMovementController : MonoBehaviour
 {
     public float _speed_scale = 0.01f;
@@ -15,14 +25,17 @@ public class RobotMovementController : MonoBehaviour
     private float remain_movement_distance = 0.0f;
     private float movement_distance = 2.5f;
 
-    public Vector2 getVector; //vector between our movement direction (_vector2_curr_dir) and vector of robot rigidbody (it is not same)
+    private Vector2 getVector; //vector between our movement direction (_vector2_curr_dir) and vector of robot rigidbody (it is not same)
+    private SensorHandler sensorHandler;
 
+    public delegate void RobotHandler(object sender, RobotEventArgs e);
+    public event RobotHandler NotifyActionDone;              
 
     // Start is called before the first frame update
     void Start()
     {
         _rigidbody2D = this.GetComponent<Rigidbody2D>();
-        
+        sensorHandler = this.GetComponent<SensorHandler>();
     }
 
     // Update is called once per frame
@@ -176,7 +189,10 @@ public class RobotMovementController : MonoBehaviour
         Vector2 current_direction = _rigidbody2D.transform.up;
         float movement_speed_cur = 0.0f;
         float movement_tick = 0.0f;
-       
+
+        ushort sensorsState = 0x0000;
+
+
         if (movement_speed < 1.0f)
         {
             movement_speed_cur = movement_speed;
@@ -194,7 +210,11 @@ public class RobotMovementController : MonoBehaviour
             remain_movement_distance = remain_movement_distance - movement_tick;
         } else
         {   //in last step our action we correct mismatch
+            //action is done
             isMovingStarted = false;
+            //notify about event
+            sensorsState = sensorHandler.getGlobalSensorState();
+            NotifyActionDone?.Invoke(this, new RobotEventArgs(sensorsState) );
         }
         
     }
