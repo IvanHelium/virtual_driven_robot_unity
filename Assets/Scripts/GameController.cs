@@ -22,12 +22,19 @@ public class GameController : MonoBehaviour {
     private string[] portNames;
     private List<string> portNamesList = new List<string>();
 
-    private ComPort comPort;
+    private static ComPort comPort;
 
     private float timeToUpdateListOfComPorts = 2.0f;
 
-    
-    private RobotMovementController robotMovementController;
+    private const byte ACTION_LEFT_135 = 0x00;
+    private const byte ACTION_LEFT_90 = 0x01;
+    private const byte ACTION_LEFT_45 = 0x02;
+    private const byte ACTION_FORWARD = 0x03;
+    private const byte ACTION_RIGHT_45 = 0x04;
+    private const byte ACTION_RIGHT_90 = 0x05;
+    private const byte ACTION_RIGHT_135 = 0x06;
+
+    private static RobotMovementController robotMovementController;
 
     void OnEnable()
     {
@@ -50,6 +57,7 @@ public class GameController : MonoBehaviour {
         {
             findRobotComponents();
             addRobotActionEventListener();
+            addSerialPortCommandReceivedEventListener();
         }
         if (scene.name == "Settings")
         {
@@ -79,7 +87,43 @@ public class GameController : MonoBehaviour {
     {
         Debug.Log("send respond : SensorsState = " + e.SensorState);
         //send to serial port
+        comPort.sendRespondFromRobot(e.SensorState);
     }
+
+    //-----------------------------------------------------------------------------
+
+    private static void MakeAction(object sender, SerialPortEventArgs e)
+    {
+        Debug.Log("Make Action number : " + e.NumberOfAction);
+        switch(e.NumberOfAction)
+        {
+            case ACTION_LEFT_135:
+                robotMovementController.action_rotate_left_135_and_move_forward();
+            break;
+            case ACTION_LEFT_90:
+                robotMovementController.action_rotate_left_90_and_move_forward();
+                break;
+            case ACTION_LEFT_45:
+                robotMovementController.action_rotate_left_45_and_move_forward();
+                break;
+            case ACTION_FORWARD:
+                robotMovementController.action_move_forward();
+                break;
+            case ACTION_RIGHT_45:
+                robotMovementController.action_rotate_right_45_and_move_forward();
+                break;
+            case ACTION_RIGHT_90:
+                robotMovementController.action_rotate_right_90_and_move_forward();
+                break;
+            case ACTION_RIGHT_135:
+                robotMovementController.action_rotate_right_135_and_move_forward();
+                break;
+            default:
+                Debug.Log("Incorrect action");
+            break;
+}
+    }
+
     //-----------------------------------------------------------------------------
 
     void addRobotActionEventListener()
@@ -89,6 +133,14 @@ public class GameController : MonoBehaviour {
             robotMovementController.NotifyActionDone += SendRespond;
         }
 
+    }
+
+    void addSerialPortCommandReceivedEventListener()
+    {
+        if(comPort != null)
+        {
+            comPort.NotifyActionCommandReceived += MakeAction;
+        }
     }
 
     //-----------------------------------------------------------------------------

@@ -47,11 +47,6 @@ public class RobotMovementController : MonoBehaviour
     private void FixedUpdate()
     {
         rotate_and_move_tick();
-
-        //action_move_forward();//debug
-        action_rotate_left_90_and_move_forward();//debug
-
-
     }
 
 
@@ -214,7 +209,7 @@ public class RobotMovementController : MonoBehaviour
             isMovingStarted = false;
             //notify about event
             sensorsState = sensorHandler.getGlobalSensorState();
-            NotifyActionDone?.Invoke(this, new RobotEventArgs(sensorsState) );
+            NotifyActionDone?.Invoke(this, new RobotEventArgs(sensorsState));
         }
         
     }
