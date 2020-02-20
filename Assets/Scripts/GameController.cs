@@ -9,6 +9,24 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 
+public class CatcherData
+{
+    private bool isFirstCapturedValue = false;
+    public ushort sensorStateCatched = 0;
+    public byte numberOfActionCatched = 0;
+    
+
+    void firstCaptureDataOccured()
+    {
+        isFirstCapturedValue = true;
+    }
+    bool getIsFirstCapturedValue()
+    {
+        return isFirstCapturedValue;
+    }
+
+
+}
 
 public class GameController : MonoBehaviour {
 
@@ -16,6 +34,9 @@ public class GameController : MonoBehaviour {
 
     private Dropdown dropdownSerialPort;
     private Button openComPortButton;
+    private InputField inputFieldNumberOfExperimentMaximum;
+    private InputField inputFieldCurrentExperiment;
+    private InputField inputFieldFileName;
     private Canvas canvas;
     private bool isSettingMenuScene;
 
@@ -36,6 +57,12 @@ public class GameController : MonoBehaviour {
 
     private static RobotMovementController robotMovementController;
 
+    private static Logger logger;
+
+    private static CatcherData catherData = new CatcherData();
+
+    private static int numberOfExperiment = 0;
+
     void OnEnable()
     {
         //Tell our 'OnLevelFinishedLoading' function to start listening for a scene change as soon as this script is enabled.
@@ -52,8 +79,8 @@ public class GameController : MonoBehaviour {
     {
         Debug.Log("Level Loaded");
         Debug.Log(scene.name);
-        
-        if(scene.name == "GameScene")
+
+        if (scene.name == "GameScene")
         {
             findRobotComponents();
             addRobotActionEventListener();
@@ -62,7 +89,9 @@ public class GameController : MonoBehaviour {
         if (scene.name == "Settings")
         {
             findUIComponentsOnSettingsScene();
+            logger.loadExperimentConfigAndSetupBuffers();
             StartCoroutine(refillDropdownList());
+            loadInputFields();
         }
     }
 
@@ -80,12 +109,56 @@ public class GameController : MonoBehaviour {
 
         }
         comPort = gameController.GetComponent<ComPort>();
+        logger = gameController.GetComponent<Logger>();
     }
+
+    //-----------------------------------------------------------------------------
+
+    static int Grade(ushort sensorData)
+    {
+        return sensorData * 10;
+    }
+
+
+    //-----------------------------------------------------------------------------
+    //mitm (men in the middle)
+    //-----------------------------------------------------------------------------
+    private static void CatchSensorState(object sender, RobotEventArgs e)
+    {
+        catherData.sensorStateCatched = e.SensorState;
+    }
+
+    private static void CatchActionAndLogData(object sender, SerialPortEventArgs e)
+    {
+        int grade = 0;
+        catherData.numberOfActionCatched = e.NumberOfAction;
+        //grade here
+        grade = Grade(catherData.sensorStateCatched);
+        //log here
+        logger.getLogsData(catherData.sensorStateCatched, catherData.numberOfActionCatched, grade);
+
+        Save(logger);
+        
+    }
+
+    private static void Save(Logger logger)
+    {
+        if(numberOfExperiment % 1000 == 0 && numberOfExperiment != 0)
+        {
+            Debug.Log(numberOfExperiment);
+            logger.PrepareAndSave();
+        }
+        if(numberOfExperiment < logger.getNumberOfExperimentMaximum() - 1)
+        {
+            numberOfExperiment++;
+        }       
+    }
+
     //-----------------------------------------------------------------------------
 
     private static void SendRespond(object sender, RobotEventArgs e) //this function send robot's state to control unit
     {
-        Debug.Log("send respond : SensorsState = " + e.SensorState);
+        //Debug.Log("send respond : SensorsState = " + e.SensorState);
         //send to serial port
         comPort.sendRespondFromRobot(e.SensorState);
     }
@@ -94,7 +167,7 @@ public class GameController : MonoBehaviour {
 
     private static void MakeAction(object sender, SerialPortEventArgs e)
     {
-        Debug.Log("Make Action number : " + e.NumberOfAction);
+        //Debug.Log("Make Action number : " + e.NumberOfAction);
         switch(e.NumberOfAction)
         {
             case ACTION_LEFT_135:
@@ -131,6 +204,7 @@ public class GameController : MonoBehaviour {
         if(robotMovementController != null)
         {
             robotMovementController.NotifyActionDone += SendRespond;
+            robotMovementController.NotifyActionDone += CatchSensorState;
         }
 
     }
@@ -140,16 +214,19 @@ public class GameController : MonoBehaviour {
         if(comPort != null)
         {
             comPort.NotifyActionCommandReceived += MakeAction;
+            comPort.NotifyActionCommandReceived += CatchActionAndLogData;
         }
     }
-
+    //----------------------------------------------------------------------------
+    // GUI part
     //-----------------------------------------------------------------------------
+
+
     private void findRobotComponents()
     {
         if (UnityEngine.Object.FindObjectOfType<RobotMovementController>() != null)
         {
             robotMovementController = UnityEngine.Object.FindObjectOfType<RobotMovementController>();
-            Debug.Log(robotMovementController);
         }
     }
 
@@ -169,20 +246,78 @@ public class GameController : MonoBehaviour {
             openComPortButton.onClick.RemoveAllListeners();
             openComPortButton.onClick.AddListener(onClickOpenPort);  
         }
+        if(GameObject.Find("InputFieldNumberOfExperimentMaximum") != null)
+        {
+            inputFieldNumberOfExperimentMaximum = GameObject.Find("InputFieldNumberOfExperimentMaximum").GetComponentInChildren<InputField>();
+            inputFieldNumberOfExperimentMaximum.onEndEdit.RemoveAllListeners();
+            inputFieldNumberOfExperimentMaximum.onEndEdit.AddListener(onEndEditInputFieldNumberOfExperimentMaximum);
+        }
+        if (GameObject.Find("InputFieldCurrentExperiment") != null)
+        {
+            inputFieldCurrentExperiment = GameObject.Find("InputFieldCurrentExperiment").GetComponentInChildren<InputField>();
+            inputFieldCurrentExperiment.onEndEdit.RemoveAllListeners();
+            inputFieldCurrentExperiment.onEndEdit.AddListener(onEndEditInputFieldCurrentExperiment);
+        }
+        if (GameObject.Find("InputFieldFileName") != null)
+        {
+            inputFieldFileName = GameObject.Find("InputFieldFileName").GetComponentInChildren<InputField>();
+            inputFieldFileName.onEndEdit.RemoveAllListeners();
+            inputFieldFileName.onEndEdit.AddListener(onEndEditInputFieldFileName);
+        }
+    }
+
+    private void onEndEditInputFieldNumberOfExperimentMaximum(string s)
+    {
+        logger.configureNumberOfExperimentMaximum(Convert.ToInt32(s));
+    }
+
+    private void onEndEditInputFieldCurrentExperiment(string s)
+    {
+        logger.setCurrentExperimentNumber(Convert.ToInt32(s));
+    }
+
+    private void onEndEditInputFieldFileName(string s)
+    {
+        logger.setFileName(s);
+    }
+
+
+    private void loadInputFields()
+    {
+        if(inputFieldNumberOfExperimentMaximum != null)
+        {
+            inputFieldNumberOfExperimentMaximum.SetTextWithoutNotify( Convert.ToString(logger.getNumberOfExperimentMaximum()));
+        }
+        if(inputFieldCurrentExperiment != null)
+        {
+            inputFieldCurrentExperiment.SetTextWithoutNotify(Convert.ToString(logger.getCurrentExperimentNumber()));
+        }
+        if(inputFieldFileName != null)
+        {
+            inputFieldFileName.SetTextWithoutNotify(Convert.ToString(logger.getFileName()));
+        }
     }
     //-----------------------------------------------------------------------------
     private IEnumerator refillDropdownList()
     {
+        int currentDropdownIndex = 0;
         while(true)
         {
+            currentDropdownIndex = dropdownSerialPort.value;
             dropdownSerialPort.ClearOptions();
             portNames = comPort.GetPortsNames();
+            if(portNames == null)
+            {
+                Debug.Log("portNames empty breaking...");
+                break;
+            }
             portNamesList.Clear();
             for (int i = 0; i < portNames.Length; i++)
             {
                 portNamesList.Add(portNames[i]);
             }
             dropdownSerialPort.AddOptions(portNamesList);
+            dropdownSerialPort.value = currentDropdownIndex;
             yield return new WaitForSeconds(timeToUpdateListOfComPorts);
         }
     }
@@ -193,58 +328,24 @@ public class GameController : MonoBehaviour {
         comPort.openSerialPort();
     }
 
-
+    private void OnDestroy()
+    {
+        logger.saveExperimentConfig();
+        Debug.Log("experiment config saved");
+        
+    }
     void OnApplicationQuit()
     {
         comPort.closeSerialPort();
-        //save someone
+        Debug.Log("serial port closed");
         Debug.Log("Application ending after " + Time.time + " seconds");
     }
 
  
 
 
-
-    //----------------------------------------------------------------------
-    // dont use for a while its just prototype
-    //----------------------------------------------------------------------
-    public void Save()
-    {
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath + "/playerInfo.dat");
-
-        PlayerData data = new PlayerData();
-        //data.WINS = WINS;
-        //data.LOSES = LOSES;
-
-        bf.Serialize(file, data);
-        file.Close();
-    }
-
-
-    public void Load()
-    {
-        if(File.Exists(Application.persistentDataPath + "/playerInfo.dat"))
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(Application.persistentDataPath + "/playerInfo.dat", FileMode.Open);
-            PlayerData data = (PlayerData)bf.Deserialize(file);
-            file.Close();
-
-            //WINS = data.WINS;
-           // LOSES = data.LOSES;
-        }
-    }
-
 	// Update is called once per frame
 	void Update () {
 
     }
-}
-
-[Serializable]
-class PlayerData //will be example
-{
-    public int WINS;
-    public int LOSES;
 }

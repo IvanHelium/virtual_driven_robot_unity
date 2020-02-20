@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.IO.Ports;
 using UnityEngine;
+using System.Threading;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public struct RespondSensorDataPacket
@@ -78,6 +79,8 @@ public class ComPort : MonoBehaviour
     {
         HandleInputData();
     }
+
+
 
     //------------------------------------------------------------------------
     //
@@ -214,27 +217,8 @@ public class ComPort : MonoBehaviour
         _serial.StopBits = StopBits.One;
         _serial.Handshake = Handshake.None;
         Debug.Log("port " + serialPortName + " configured");
-
-
-        _serial.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
-
-
     }
-
-
-    private static void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
-    {
-
-        Debug.Log("DataReceivedHandler finally called");
-        /*SerialPort serial = (SerialPort)sender;
-        byte[] receivedArray = new byte[serial.BytesToRead];
-        serial.Read(receivedArray, 0, serial.BytesToRead);
-        Console.WriteLine("Data Received:");
-        Console.Write(receivedArray);*/
-        // if (someone)
-        // NotifyActionCommandReceived Invoke
-
-    }
+   
 
     public bool openSerialPort()
     {
@@ -272,6 +256,10 @@ public class ComPort : MonoBehaviour
             case RuntimePlatform.OSXPlayer:
             case RuntimePlatform.OSXEditor:
             case RuntimePlatform.LinuxPlayer:
+                portNames = System.IO.Ports.SerialPort.GetPortNames();
+
+                break;
+
             default: // Windows
                 portNames = System.IO.Ports.SerialPort.GetPortNames();
                 break;
