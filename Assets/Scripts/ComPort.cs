@@ -192,13 +192,21 @@ public class ComPort : MonoBehaviour
     public void sendRespondFromRobot(ushort SensorsState)
     {
         byte[] respondPacketInBytes;
-        int count;
         respondPacketInBytes = FormPacketForRespondIntoByteArray(SensorsState);
         //send to serial port
         _serial.Write(respondPacketInBytes, 0, respondPacketInBytes.Length);
     }
 
-
+    public void sendSaveDatabase()
+    {
+        byte[] respondPacketInBytes = { 0xBA, 0x2B, 0x00, 0x00, 0xE5 };
+        _serial.Write(respondPacketInBytes, 0, respondPacketInBytes.Length);
+    }
+    public void sendLoadDatabase()
+    {
+        byte[] respondPacketInBytes = { 0xBA, 0x2C, 0x00, 0x00, 0xE6 };
+        _serial.Write(respondPacketInBytes, 0, respondPacketInBytes.Length);
+    }
     //------------------------------------------------------------------------
     //general com port functions
     //------------------------------------------------------------------------

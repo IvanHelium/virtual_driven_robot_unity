@@ -63,6 +63,7 @@ public class GameController : MonoBehaviour {
 
     private static int numberOfExperiment = 0;
 
+
     void OnEnable()
     {
         //Tell our 'OnLevelFinishedLoading' function to start listening for a scene change as soon as this script is enabled.
@@ -85,6 +86,7 @@ public class GameController : MonoBehaviour {
             findRobotComponents();
             addRobotActionEventListener();
             addSerialPortCommandReceivedEventListener();
+            robotMovementController.action_move_forward();//first stimulus
         }
         if (scene.name == "Settings")
         {
@@ -116,7 +118,17 @@ public class GameController : MonoBehaviour {
 
     static int Grade(ushort sensorData)
     {
-        return sensorData * 10;
+
+        int gradeObstaclesBits = 0;
+        int gradeDirectionsBits = 0;
+        int gradeDistanceBits = 0;
+
+        gradeObstaclesBits = (~(sensorData) & 0x01) * 8000 + ((~(sensorData) & 0x02) >> 1) * 40000 + ((~(sensorData) & 0x04) >> 3) * 8000;
+        gradeDirectionsBits = (((sensorData & 0x78) >> 3) * -4000) / 16 + 8000;
+        gradeDistanceBits = (((sensorData & 0x780) >> 7) * -4000) / 16;
+
+        return gradeObstaclesBits + gradeDirectionsBits + gradeDistanceBits;
+
     }
 
 
@@ -143,9 +155,10 @@ public class GameController : MonoBehaviour {
 
     private static void Save(Logger logger)
     {
-        if(numberOfExperiment % 1000 == 0 && numberOfExperiment != 0)
+        if(numberOfExperiment % 509 == 0)
         {
             Debug.Log(numberOfExperiment);
+            comPort.sendSaveDatabase();
             logger.PrepareAndSave();
         }
         if(numberOfExperiment < logger.getNumberOfExperimentMaximum() - 1)
@@ -336,6 +349,8 @@ public class GameController : MonoBehaviour {
     }
     void OnApplicationQuit()
     {
+        //send command save database
+        comPort.sendSaveDatabase();
         comPort.closeSerialPort();
         Debug.Log("serial port closed");
         Debug.Log("Application ending after " + Time.time + " seconds");
