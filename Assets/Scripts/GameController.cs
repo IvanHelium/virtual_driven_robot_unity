@@ -64,6 +64,16 @@ public class GameController : MonoBehaviour {
     private static int numberOfExperiment = 0;
 
 
+    void OnGUI()
+    {
+        Scene scene = SceneManager.GetActiveScene(); 
+        if (scene.name == "GameScene")
+        {
+            GUI.Label(new Rect(10, 10, 220, 20), "numberOfExperiment = " + numberOfExperiment);
+        }
+        
+    }
+
     void OnEnable()
     {
         //Tell our 'OnLevelFinishedLoading' function to start listening for a scene change as soon as this script is enabled.
@@ -160,6 +170,7 @@ public class GameController : MonoBehaviour {
             Debug.Log(numberOfExperiment);
             comPort.sendSaveDatabase();
             logger.PrepareAndSave();
+
         }
         if(numberOfExperiment < logger.getNumberOfExperimentMaximum() - 1)
         {
